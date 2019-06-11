@@ -1,6 +1,9 @@
 var inquirer = require('inquirer');
 var mysql      = require('mysql');
 var Table = require('cli-table');
+var displayTable = [];
+var quantityNeeded;
+var IDrequested;
 
 var connection = mysql.createConnection({
 	host:"localhost",
@@ -15,7 +18,23 @@ connection.connect(function(err){
 	console.log("connected as id" + connection.threadId);
 });
 
-
+var displayProducts = function(){
+	var query = "Select * FROM products";
+	connection.query(query, function(err, res){
+		if(err) throw err;
+		var displayTable = new Table ({
+			head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
+			colWidths: [10,25,25,10,14]
+		});
+		for(var i = 0; i < res.length; i++){
+			displayTable.push(
+				[res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
+				);
+		}
+		console.log(displayTable.toString());
+		questionPrompt();
+	});
+}
 
 
 function questionPrompt(){
@@ -36,20 +55,33 @@ function questionPrompt(){
  ]).then(function(answers){
  	var quantityNeeded = answers.Quantity;
  	var IDrequested = answers.ID;
- 	console.log(quantityNeeded);
-    console.log(IDrequested);
+	
+	
+	 purchaseOrder(IDrequested, quantityNeeded);
+	
+
 });
 };
-function databaseQuerry(){
-//Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
-var query = "SELECT * FROM Products";
-connection.query(query, function(err, res) {
-console.log(res);
-});
-    console.log(query)
+ 
+function purchaseOrder(IDrequested, quantityNeeded){
+	
+	
+	connection.query('Select * FROM products WHERE item_id = ' + IDrequested, function(err, res) {
+		if(quantityNeeded > res[0].stock_quantity){
+			console.log("Sorry Not in Stock");
+		}else{
+			console.log("We Have it in stock");
+			console.log("The Price of your " + res[0].product_name + " is: $"  + res[0].price);
+		}
+		
 
-}     
-    
-//questionPrompt();
-databaseQuerry();
+	});
+};
+
+
+
+
+displayProducts();
+
+
 
