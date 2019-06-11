@@ -72,6 +72,10 @@ function purchaseOrder(IDrequested, quantityNeeded){
 		}else{
 			console.log("We Have it in stock");
 			console.log("The Price of your " + res[0].product_name + " is: $"  + res[0].price);
+			connection.query('UPDATE Products SET stock_quantity = stock_quantity -' + quantityNeeded, function(err, res) {
+			
+			});
+		
 		}
 		
 
